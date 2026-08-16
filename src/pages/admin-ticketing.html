@@ -1,0 +1,447 @@
+﻿<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ticket Counter | Binary Fest 2026</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Poppins', 'Hind Siliguri', sans-serif; }
+  .bn { font-family: 'Hind Siliguri', sans-serif; }
+  .ticket-badge {
+    background: linear-gradient(160deg, #ffffff 0%, #f4f7ff 100%);
+    border: 1px solid #e2e8f0;
+  }
+  .gradient-header { background: linear-gradient(120deg, #4338ca 0%, #6d28d9 50%, #db2777 100%); }
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 4px; }
+</style>
+</head>
+<body class="bg-slate-100 min-h-screen">
+
+<!-- ============================= AUTH SCREEN ============================= -->
+<section id="auth-screen" class="min-h-screen flex items-center justify-center p-4">
+  <div class="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden">
+    <div class="gradient-header p-6 text-white text-center">
+      <i class="fas fa-ticket text-4xl mb-2"></i>
+      <h1 class="text-xl font-bold">Ticket Counter Login</h1>
+      <p class="text-indigo-100 text-sm">Binary Fest 2026 — Counter Portal</p>
+    </div>
+    <div class="p-6">
+      <div class="flex mb-5 bg-slate-100 rounded-lg p-1">
+        <button id="tab-login" onclick="switchTab('login')" class="flex-1 py-2 rounded-md text-sm font-semibold bg-white shadow text-indigo-700">Login</button>
+        <button id="tab-register" onclick="switchTab('register')" class="flex-1 py-2 rounded-md text-sm font-semibold text-slate-500">Register</button>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <form id="login-form" class="space-y-4">
+        <div>
+          <label class="text-xs font-semibold text-slate-500">Username</label>
+          <input id="login-username" type="text" required class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="e.g. counter_ashik">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-500">Password</label>
+          <input id="login-password" type="password" required class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="••••••••">
+        </div>
+        <div id="login-error" class="hidden text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2"></div>
+        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 rounded-lg transition">
+          <i class="fas fa-right-to-bracket mr-1"></i> Login
+        </button>
+      </form>
+
+      <!-- REGISTER FORM -->
+      <form id="register-form" class="space-y-4 hidden">
+        <div>
+          <label class="text-xs font-semibold text-slate-500">Full Name</label>
+          <input id="reg-fullname" type="text" required class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Your name">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-500">Username</label>
+          <input id="reg-username" type="text" required class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="choose a username">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-500">Password</label>
+          <input id="reg-password" type="password" required minlength="6" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="min 6 characters">
+        </div>
+        <div id="register-msg" class="hidden text-sm rounded-lg px-3 py-2"></div>
+        <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 rounded-lg transition">
+          <i class="fas fa-user-plus mr-1"></i> Register (Requires Approval)
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= MAIN APP ============================= -->
+<section id="app-screen" class="hidden min-h-screen">
+  <header class="gradient-header text-white shadow-lg">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <i class="fas fa-ticket text-2xl"></i>
+        <div>
+          <h1 class="font-bold text-lg leading-tight">Ticket Creation Counter</h1>
+          <p class="text-xs text-indigo-100">Binary Fest 2026</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <span id="who" class="text-sm bg-white/15 px-3 py-1 rounded-full"></span>
+        <button onclick="logout()" class="text-sm bg-white/15 hover:bg-white/25 px-3 py-1.5 rounded-full">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto p-4 grid md:grid-cols-2 gap-6 mt-4">
+    <!-- FORM PANEL -->
+    <div class="bg-white rounded-2xl shadow-lg p-6">
+      <h2 class="font-bold text-slate-800 mb-4 flex items-center gap-2"><i class="fas fa-user-edit text-indigo-600"></i> Attendee Information</h2>
+      <form id="ticket-form" class="space-y-4">
+        <div>
+          <label class="text-xs font-semibold text-slate-500">Student Name *</label>
+          <input id="f-name" required class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="Full name">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-semibold text-slate-500">University ID *</label>
+            <input id="f-uid" required class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="e.g. 213902052">
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-slate-500">Category *</label>
+            <select id="f-category" required class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+              <option value="CSE">CSE</option>
+              <option value="Others">Others</option>
+              <option value="Outsiders">Outsiders</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-500">University Email *</label>
+          <input id="f-email" type="email" required class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="name@university.edu">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-semibold text-slate-500">Batch (Manual)</label>
+            <input id="f-batch" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="e.g. Batch 52">
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-slate-500">Section</label>
+            <input id="f-section" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="e.g. A">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-semibold text-slate-500">Ticket Price (BDT)</label>
+            <input id="f-price" type="number" value="1000" min="0" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-slate-500">Bus Pickup Point *</label>
+            <select id="f-bus" required class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></select>
+          </div>
+        </div>
+        <div id="ticket-error" class="hidden text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2"></div>
+        <div id="ticket-success" class="hidden text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2"></div>
+        <button type="submit" id="submit-btn" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 text-white font-bold py-3 rounded-lg transition flex items-center justify-center gap-2">
+          <i class="fas fa-bolt"></i> Generate QR Code & Add to Server
+        </button>
+      </form>
+    </div>
+
+    <!-- LIVE QR + BADGE PANEL -->
+    <div class="bg-white rounded-2xl shadow-lg p-6 flex flex-col items-center">
+      <h2 class="font-bold text-slate-800 mb-4 self-start flex items-center gap-2"><i class="fas fa-qrcode text-purple-600"></i> Live Ticket Preview</h2>
+
+      <div id="ticket-badge" class="ticket-badge rounded-2xl shadow-md w-full max-w-sm p-6 flex flex-col items-center gap-4">
+        <div class="text-center">
+          <p class="text-xs uppercase tracking-widest text-purple-500 font-semibold">Welcome to</p>
+          <p class="text-xl font-extrabold bg-gradient-to-r from-indigo-600 to-pink-600 bg-clip-text text-transparent">Binary Fest 2026</p>
+        </div>
+        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-inner flex items-center justify-center">
+          <canvas id="qr-canvas" width="220" height="220"></canvas>
+        </div>
+        <p id="badge-name" class="text-lg font-bold text-slate-800 text-center">Attendee Name</p>
+      </div>
+
+      <p class="text-xs text-slate-400 mt-4 text-center">QR code updates live as you type. Click "Generate QR Code &amp; Add to Server" to save the ticket permanently.</p>
+
+      <div id="saved-info" class="hidden mt-4 w-full bg-indigo-50 border border-indigo-200 rounded-xl p-4 text-sm">
+        <p class="font-semibold text-indigo-700 mb-1"><i class="fas fa-circle-check"></i> Ticket Generated &amp; Saved!</p>
+        <p class="mb-2">Ticket Code: <span id="saved-code" class="font-mono font-bold text-indigo-900"></span></p>
+        <div class="flex flex-col sm:flex-row gap-2 mt-3">
+          <button onclick="downloadQRAttachment()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5 transition shadow">
+            <i class="fas fa-download"></i> Download PNG
+          </button>
+          <button id="send-email-btn" onclick="sendMailWithQR()" class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5 transition shadow">
+            <i class="fas fa-paper-plane"></i> Send Auto-Attached Email
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+</section>
+
+<script>
+const API = '';
+let token = localStorage.getItem('bf_token') || '';
+let currentUser = JSON.parse(localStorage.getItem('bf_user') || 'null');
+let currentSavedTicket = null;
+
+const BUS_POINTS_FALLBACK = ["ভালুকা","মাওনা","রাজেন্দ্রপুর","শিববাড়ি","শিমুলতলী","চন্দ্রা","কোনাবাড়ি","সাভার","শ্রীপুর","নরসিংদী","কালিগঞ্জ","চাষাড়া","বাসাবো","স্টাফ কোয়ার্টার","মোহাম্মদপুর","মিরপুর ইসিবি","মিরপুর ১৪","মিরপুর ১২","মিরপুর ১০","মহাখালী","টঙ্গী কলেজ গেট","ঘোড়াশাল","শিববাড়ি ডুয়েট","উত্তরা"];
+
+function switchTab(tab) {
+  document.getElementById('login-form').classList.toggle('hidden', tab !== 'login');
+  document.getElementById('register-form').classList.toggle('hidden', tab !== 'register');
+  document.getElementById('tab-login').className = tab === 'login'
+    ? 'flex-1 py-2 rounded-md text-sm font-semibold bg-white shadow text-indigo-700'
+    : 'flex-1 py-2 rounded-md text-sm font-semibold text-slate-500';
+  document.getElementById('tab-register').className = tab === 'register'
+    ? 'flex-1 py-2 rounded-md text-sm font-semibold bg-white shadow text-indigo-700'
+    : 'flex-1 py-2 rounded-md text-sm font-semibold text-slate-500';
+}
+
+function showApp() {
+  document.getElementById('auth-screen').classList.add('hidden');
+  document.getElementById('app-screen').classList.remove('hidden');
+  document.getElementById('who').textContent = (currentUser.full_name || currentUser.username) + ' · ' + currentUser.role;
+  populateBusPoints();
+  renderQR();
+}
+
+function showAuth() {
+  document.getElementById('auth-screen').classList.remove('hidden');
+  document.getElementById('app-screen').classList.add('hidden');
+}
+
+function logout() {
+  localStorage.removeItem('bf_token');
+  localStorage.removeItem('bf_user');
+  token = ''; currentUser = null;
+  showAuth();
+}
+
+async function populateBusPoints() {
+  let points = BUS_POINTS_FALLBACK;
+  try {
+    const res = await axios.get('/api/bus-points');
+    if (res.data.bus_points) points = res.data.bus_points;
+  } catch (e) {}
+  const sel = document.getElementById('f-bus');
+  sel.innerHTML = points.map(p => <option value=""></option>).join('');
+}
+
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-error');
+  errEl.classList.add('hidden');
+  try {
+    const res = await axios.post('/api/auth/login', { username, password });
+    if (res.data.user.role !== 'counter' && res.data.user.role !== 'super') {
+      errEl.textContent = 'This account is not authorized for the Ticket Counter app.';
+      errEl.classList.remove('hidden');
+      return;
+    }
+    token = res.data.token;
+    currentUser = res.data.user;
+    localStorage.setItem('bf_token', token);
+    localStorage.setItem('bf_user', JSON.stringify(currentUser));
+    showApp();
+  } catch (err) {
+    errEl.textContent = err.response?.data?.error || 'Login failed';
+    errEl.classList.remove('hidden');
+  }
+});
+
+document.getElementById('register-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const full_name = document.getElementById('reg-fullname').value.trim();
+  const username = document.getElementById('reg-username').value.trim();
+  const password = document.getElementById('reg-password').value;
+  const msgEl = document.getElementById('register-msg');
+  try {
+    const res = await axios.post('/api/auth/register', { username, password, full_name, role: 'counter' });
+    msgEl.textContent = res.data.message;
+    msgEl.className = 'text-sm rounded-lg px-3 py-2 bg-green-50 border border-green-200 text-green-700';
+    msgEl.classList.remove('hidden');
+    document.getElementById('register-form').reset();
+  } catch (err) {
+    msgEl.textContent = err.response?.data?.error || 'Registration failed';
+    msgEl.className = 'text-sm rounded-lg px-3 py-2 bg-red-50 border border-red-200 text-red-700';
+    msgEl.classList.remove('hidden');
+  }
+});
+
+// ---------------- Multi-Engine Rock-Solid QR Generator ----------------
+function generateQRToCanvas(canvasEl, payloadString) {
+  if (!canvasEl) return;
+  const text = payloadString || 'Binary Fest 2026';
+  
+  if (typeof QRious !== 'undefined') {
+    try {
+      new QRious({
+        element: canvasEl,
+        value: text,
+        size: 220,
+        level: 'H',
+        foreground: '#312e81',
+        background: '#ffffff'
+      });
+      return;
+    } catch (e) {}
+  }
+
+  if (typeof QRCode !== 'undefined' && QRCode.toCanvas) {
+    try {
+      QRCode.toCanvas(canvasEl, text, {
+        width: 220, margin: 1, color: { dark: '#312e81', light: '#ffffff' }
+      }, function(err) {});
+    } catch (e) {}
+  }
+}
+
+function currentFormData() {
+  return {
+    name: document.getElementById('f-name').value.trim() || 'Attendee Name',
+    university_id: document.getElementById('f-uid').value.trim(),
+    university_email: document.getElementById('f-email').value.trim(),
+    category: document.getElementById('f-category').value,
+    batch: document.getElementById('f-batch').value.trim(),
+    section: document.getElementById('f-section').value.trim(),
+    price: parseFloat(document.getElementById('f-price').value) || 1000,
+    bus_point: document.getElementById('f-bus').value,
+  };
+}
+
+function renderQR() {
+  const data = currentFormData();
+  document.getElementById('badge-name').textContent = data.name || 'Attendee Name';
+  const previewPayload = BF26||||;
+  const canvas = document.getElementById('qr-canvas');
+  generateQRToCanvas(canvas, previewPayload);
+}
+
+['f-name','f-uid','f-email','f-category','f-batch','f-section','f-price','f-bus'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener('input', renderQR);
+    el.addEventListener('change', renderQR);
+  }
+});
+
+function downloadQRAttachment() {
+  const canvas = document.getElementById('qr-canvas');
+  if (!canvas) return;
+  const image = canvas.toDataURL('image/png');
+  const code = (currentSavedTicket && currentSavedTicket.ticket_code) || document.getElementById('saved-code').textContent || 'ticket';
+  const a = document.createElement('a');
+  a.href = image;
+  a.download = BinaryFest_QR_.png;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+async function sendMailWithQR() {
+  const btn = document.getElementById('send-email-btn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending Email...'; }
+
+  downloadQRAttachment();
+  const ticket = currentSavedTicket || {};
+  const code = ticket.ticket_code || document.getElementById('saved-code').textContent || '';
+  const canvas = document.getElementById('qr-canvas');
+  const qrImageData = canvas ? canvas.toDataURL('image/png') : null;
+
+  try {
+    const res = await axios.post(/api/tickets//send-email, {
+      qr_image: qrImageData
+    }, { headers: { Authorization: 'Bearer ' + token } });
+    
+    alert('✅ ' + (res.data.message || 'Email sent successfully with QR code auto-attached!'));
+  } catch (err) {
+    const email = ticket.university_email || document.getElementById('f-email').value.trim() || '';
+    const name = ticket.name || document.getElementById('f-name').value.trim() || 'Attendee';
+    const bus = ticket.bus_point || document.getElementById('f-bus').value || '';
+    const price = ticket.price || document.getElementById('f-price').value || 1000;
+    const category = ticket.category || document.getElementById('f-category').value || '';
+
+    const subject = encodeURIComponent(Binary Fest 2026 Official Ticket & QR Code - );
+    const body = encodeURIComponent(
+Dear ,
+
+Your ticket for Binary Fest 2026 has been generated successfully.
+
+🎫 Ticket Code: 
+👤 Name: 
+🚌 Bus Pickup Point: 
+💵 Amount Paid: ৳ (Confirmed)
+🏷️ Category: 
+
+📌 QR ATTACHMENT INSTRUCTIONS:
+The official QR Code PNG attachment (BinaryFest_QR_.png) has been downloaded to your computer. Please present this image for ticket verification.
+
+Best regards,
+Binary Fest 2026 Organizing Committee
+    );
+    window.open(https://mail.google.com/mail/?view=cm&fs=1&to=&su=&body=, '_blank');
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Auto-Attached Email'; }
+  }
+}
+
+document.getElementById('ticket-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const errEl = document.getElementById('ticket-error');
+  const okEl = document.getElementById('ticket-success');
+  errEl.classList.add('hidden');
+  okEl.classList.add('hidden');
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+  const data = currentFormData();
+  try {
+    const res = await axios.post('/api/tickets', data, { headers: { Authorization: 'Bearer ' + token } });
+    const ticket = res.data.ticket;
+    currentSavedTicket = ticket;
+
+    const canvas = document.getElementById('qr-canvas');
+    generateQRToCanvas(canvas, ticket.qr_payload);
+
+    okEl.textContent = 'Ticket generated and saved to server successfully!';
+    okEl.classList.remove('hidden');
+    document.getElementById('saved-info').classList.remove('hidden');
+    document.getElementById('saved-code').textContent = ticket.ticket_code;
+
+    // Automatically trigger email dispatch with auto-attached QR image
+    setTimeout(() => {
+      sendMailWithQR();
+    }, 500);
+
+    document.getElementById('ticket-form').reset();
+    document.getElementById('f-price').value = 1000;
+  } catch (err) {
+    errEl.textContent = err.response?.data?.error || 'Failed to save ticket';
+    errEl.classList.remove('hidden');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-bolt"></i> Generate QR Code & Add to Server';
+  }
+});
+
+// ---------------- Init ----------------
+(function init() {
+  if (token && currentUser) {
+    showApp();
+  } else {
+    showAuth();
+  }
+})();
+</script>
+</body>
+</html>
