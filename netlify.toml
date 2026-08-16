@@ -3,6 +3,26 @@
   publish = "dist"
 
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
+  from = "/admin"
+  to = "/src/pages/admin-dashboard.html"
+  status = 200
+
+[[redirects]]
+  from = "/counter"
+  to = "/src/pages/admin-ticketing.html"
+  status = 200
+
+[[redirects]]
+  from = "/ticket"
+  to = "/src/pages/admin-ticketing.html"
+  status = 200
+
+[[redirects]]
+  from = "/checker"
+  to = "/src/pages/gate-verifier.html"
+  status = 200
+
+[[redirects]]
+  from = "/gate"
+  to = "/src/pages/gate-verifier.html"
   status = 200
