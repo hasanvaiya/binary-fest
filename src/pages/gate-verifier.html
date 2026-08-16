@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gate Verifier | Binary Fest 2026</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Poppins', 'Hind Siliguri', sans-serif; }
+  .gradient-header { background: linear-gradient(120deg, #0f172a 0%, #1e3a8a 50%, #4338ca 100%); }
+  #reader { border-radius: 1rem; overflow: hidden; }
+  .pulse-ring { animation: pulse-ring 1.6s cubic-bezier(0.215,0.61,0.355,1) infinite; }
+  @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 rgba(34,197,94,0.5);} 80%,100% { box-shadow: 0 0 0 16px rgba(34,197,94,0);} }
+  .pulse-ring-red { animation: pulse-ring-red 1.6s cubic-bezier(0.215,0.61,0.355,1) infinite; }
+  @keyframes pulse-ring-red { 0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5);} 80%,100% { box-shadow: 0 0 0 16px rgba(239,68,68,0);} }
+</style>
+</head>
+<body class="bg-slate-950 min-h-screen text-slate-100">
+
+<!-- ============================= AUTH SCREEN ============================= -->
+<section id="auth-screen" class="min-h-screen flex items-center justify-center p-4">
+  <div class="w-full max-w-md bg-slate-900 rounded-2xl shadow-xl overflow-hidden border border-slate-800">
+    <div class="gradient-header p-6 text-white text-center">
+      <i class="fas fa-shield-halved text-4xl mb-2"></i>
+      <h1 class="text-xl font-bold">Gate Verifier Login</h1>
+      <p class="text-blue-100 text-sm">Binary Fest 2026 — Security Portal</p>
+    </div>
+    <div class="p-6">
+      <div class="flex mb-5 bg-slate-800 rounded-lg p-1">
+        <button id="tab-login" onclick="switchTab('login')" class="flex-1 py-2 rounded-md text-sm font-semibold bg-slate-700 shadow text-blue-300">Login</button>
+        <button id="tab-register" onclick="switchTab('register')" class="flex-1 py-2 rounded-md text-sm font-semibold text-slate-400">Register</button>
+      </div>
+
+      <form id="login-form" class="space-y-4">
+        <div>
+          <label class="text-xs font-semibold text-slate-400">Username</label>
+          <input id="login-username" type="text" required class="mt-1 w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-white" placeholder="e.g. gate_rafi">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-400">Password</label>
+          <input id="login-password" type="password" required class="mt-1 w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-white" placeholder="••••••••">
+        </div>
+        <div id="login-error" class="hidden text-sm text-red-400 bg-red-900/30 border border-red-800 rounded-lg px-3 py-2"></div>
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg transition">
+          <i class="fas fa-right-to-bracket mr-1"></i> Login
+        </button>
+      </form>
+
+      <form id="register-form" class="space-y-4 hidden">
+        <div>
+          <label class="text-xs font-semibold text-slate-400">Full Name</label>
+          <input id="reg-fullname" type="text" required class="mt-1 w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-white" placeholder="Your name">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-400">Username</label>
+          <input id="reg-username" type="text" required class="mt-1 w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-white" placeholder="choose a username">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-400">Password</label>
+          <input id="reg-password" type="password" required minlength="6" class="mt-1 w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none text-white" placeholder="min 6 characters">
+        </div>
+        <div id="register-msg" class="hidden text-sm rounded-lg px-3 py-2"></div>
+        <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-2.5 rounded-lg transition">
+          <i class="fas fa-user-plus mr-1"></i> Register (Requires Approval)
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= MAIN APP ============================= -->
+<section id="app-screen" class="hidden min-h-screen">
+  <header class="gradient-header text-white shadow-lg">
+    <div class="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <i class="fas fa-shield-halved text-2xl"></i>
+        <div>
+          <h1 class="font-bold text-lg leading-tight">Ticket Gate Verifier</h1>
+          <p class="text-xs text-blue-100">Binary Fest 2026</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <span id="who" class="text-sm bg-white/15 px-3 py-1 rounded-full"></span>
+        <button onclick="logout()" class="text-sm bg-white/15 hover:bg-white/25 px-3 py-1.5 rounded-full">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-3xl mx-auto p-4 mt-4 space-y-6">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-lg p-5">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="font-bold text-white flex items-center gap-2"><i class="fas fa-camera text-blue-400"></i> Camera Scanner</h2>
+        <button id="toggle-scan-btn" onclick="toggleScanner()" class="text-sm bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg font-semibold">
+          <i class="fas fa-play"></i> Start Scanning
+        </button>
+      </div>
+      <div id="reader" class="w-full"></div>
+      <p class="text-xs text-slate-500 mt-3 text-center">Point the camera at the attendee's 1:1 QR ticket. Verification happens automatically.</p>
+    </div>
+
+    <!-- RESULT PANEL -->
+    <div id="result-panel" class="hidden rounded-2xl shadow-lg p-6 border-2">
+      <div id="result-header" class="flex items-center gap-3 mb-4">
+        <div id="result-icon-wrap" class="w-14 h-14 rounded-full flex items-center justify-center text-2xl"></div>
+        <div>
+          <h3 id="result-title" class="text-xl font-extrabold"></h3>
+          <p id="result-sub" class="text-sm text-slate-400"></p>
+        </div>
+      </div>
+
+      <div id="result-details" class="hidden grid grid-cols-2 gap-3 text-sm bg-slate-800/60 rounded-xl p-4 mb-4">
+        <div><span class="text-slate-400">Name</span><p id="d-name" class="font-semibold text-white"></p></div>
+        <div><span class="text-slate-400">University ID</span><p id="d-uid" class="font-semibold text-white"></p></div>
+        <div><span class="text-slate-400">Category / Batch</span><p id="d-cat" class="font-semibold text-white"></p></div>
+        <div><span class="text-slate-400">Section</span><p id="d-section" class="font-semibold text-white"></p></div>
+        <div><span class="text-slate-400">Bus Pickup Point</span><p id="d-bus" class="font-semibold text-white"></p></div>
+        <div><span class="text-slate-400">Ticket Code</span><p id="d-code" class="font-mono font-semibold text-white"></p></div>
+        <div class="col-span-2"><span class="text-slate-400">Boarding Status</span><p id="d-boarded" class="font-semibold"></p></div>
+      </div>
+
+      <button id="confirm-board-btn" onclick="confirmBoard()" class="hidden w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition">
+        <i class="fas fa-bus"></i> Confirm Bus Boarded &amp; Verified
+      </button>
+
+      <button onclick="resetResult()" class="w-full mt-3 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2.5 rounded-lg transition">
+        <i class="fas fa-rotate-left"></i> Scan Next Ticket
+      </button>
+    </div>
+  </main>
+</section>
+
+<script>
+let token = localStorage.getItem('bf_token_gate') || '';
+let currentUser = JSON.parse(localStorage.getItem('bf_user_gate') || 'null');
+let html5QrCode = null;
+let scanning = false;
+let currentTicketCode = null;
+let processingScan = false;
+
+function switchTab(tab) {
+  document.getElementById('login-form').classList.toggle('hidden', tab !== 'login');
+  document.getElementById('register-form').classList.toggle('hidden', tab !== 'register');
+  document.getElementById('tab-login').className = tab === 'login'
+    ? 'flex-1 py-2 rounded-md text-sm font-semibold bg-slate-700 shadow text-blue-300'
+    : 'flex-1 py-2 rounded-md text-sm font-semibold text-slate-400';
+  document.getElementById('tab-register').className = tab === 'register'
+    ? 'flex-1 py-2 rounded-md text-sm font-semibold bg-slate-700 shadow text-blue-300'
+    : 'flex-1 py-2 rounded-md text-sm font-semibold text-slate-400';
+}
+
+function showApp() {
+  document.getElementById('auth-screen').classList.add('hidden');
+  document.getElementById('app-screen').classList.remove('hidden');
+  document.getElementById('who').textContent = (currentUser.full_name || currentUser.username) + ' · ' + currentUser.role;
+}
+function showAuth() {
+  document.getElementById('auth-screen').classList.remove('hidden');
+  document.getElementById('app-screen').classList.add('hidden');
+}
+function logout() {
+  stopScanner();
+  localStorage.removeItem('bf_token_gate');
+  localStorage.removeItem('bf_user_gate');
+  token = ''; currentUser = null;
+  showAuth();
+}
+
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-error');
+  errEl.classList.add('hidden');
+  try {
+    const res = await axios.post('/api/auth/login', { username, password });
+    if (res.data.user.role !== 'gate' && res.data.user.role !== 'super') {
+      errEl.textContent = 'This account is not authorized for the Gate Verifier app.';
+      errEl.classList.remove('hidden');
+      return;
+    }
+    token = res.data.token;
+    currentUser = res.data.user;
+    localStorage.setItem('bf_token_gate', token);
+    localStorage.setItem('bf_user_gate', JSON.stringify(currentUser));
+    showApp();
+  } catch (err) {
+    errEl.textContent = err.response?.data?.error || 'Login failed';
+    errEl.classList.remove('hidden');
+  }
+});
+
+document.getElementById('register-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const full_name = document.getElementById('reg-fullname').value.trim();
+  const username = document.getElementById('reg-username').value.trim();
+  const password = document.getElementById('reg-password').value;
+  const msgEl = document.getElementById('register-msg');
+  try {
+    const res = await axios.post('/api/auth/register', { username, password, full_name, role: 'gate' });
+    msgEl.textContent = res.data.message;
+    msgEl.className = 'text-sm rounded-lg px-3 py-2 bg-green-900/30 border border-green-800 text-green-300';
+    msgEl.classList.remove('hidden');
+    document.getElementById('register-form').reset();
+  } catch (err) {
+    msgEl.textContent = err.response?.data?.error || 'Registration failed';
+    msgEl.className = 'text-sm rounded-lg px-3 py-2 bg-red-900/30 border border-red-800 text-red-300';
+    msgEl.classList.remove('hidden');
+  }
+});
+
+// ---------------- QR Scanner ----------------
+function toggleScanner() {
+  if (scanning) { stopScanner(); } else { startScanner(); }
+}
+
+function startScanner() {
+  resetResult();
+  html5QrCode = new Html5Qrcode('reader');
+  const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+  html5QrCode.start({ facingMode: 'environment' }, config, onScanSuccess, () => {})
+    .then(() => {
+      scanning = true;
+      document.getElementById('toggle-scan-btn').innerHTML = '<i class="fas fa-stop"></i> Stop Scanning';
+    })
+    .catch((err) => {
+      alert('Unable to access camera: ' + err);
+    });
+}
+
+function stopScanner() {
+  if (html5QrCode && scanning) {
+    html5QrCode.stop().then(() => {
+      html5QrCode.clear();
+      scanning = false;
+      document.getElementById('toggle-scan-btn').innerHTML = '<i class="fas fa-play"></i> Start Scanning';
+    }).catch(() => {});
+  }
+}
+
+async function onScanSuccess(decodedText) {
+  if (processingScan) return;
+  processingScan = true;
+  stopScanner();
+  await verifyPayload(decodedText);
+  processingScan = false;
+}
+
+async function verifyPayload(qrPayload) {
+  try {
+    const res = await axios.post('/api/verify', { qr_payload: qrPayload }, { headers: { Authorization: 'Bearer ' + token } });
+    if (res.data.valid) {
+      showValidResult(res.data.ticket);
+    } else {
+      showInvalidResult();
+    }
+  } catch (err) {
+    showInvalidResult();
+  }
+}
+
+function showValidResult(ticket) {
+  currentTicketCode = ticket.ticket_code;
+  const panel = document.getElementById('result-panel');
+  panel.classList.remove('hidden');
+  panel.className = 'rounded-2xl shadow-lg p-6 border-2 border-green-600 bg-green-950/40';
+
+  document.getElementById('result-icon-wrap').className = 'w-14 h-14 rounded-full flex items-center justify-center text-2xl bg-green-600 pulse-ring';
+  document.getElementById('result-icon-wrap').innerHTML = '<i class="fas fa-circle-check"></i>';
+  document.getElementById('result-title').textContent = '✅ VALID TICKET CONFIRMED';
+  document.getElementById('result-title').className = 'text-xl font-extrabold text-green-400';
+  document.getElementById('result-sub').textContent = 'Ticket Code: ' + ticket.ticket_code;
+
+  document.getElementById('result-details').classList.remove('hidden');
+  document.getElementById('d-name').textContent = ticket.name;
+  document.getElementById('d-uid').textContent = ticket.university_id;
+  document.getElementById('d-cat').textContent = ticket.category + (ticket.batch ? ' / ' + ticket.batch : '');
+  document.getElementById('d-section').textContent = ticket.section || '-';
+  document.getElementById('d-bus').textContent = ticket.bus_point;
+  document.getElementById('d-code').textContent = ticket.ticket_code;
+
+  const boardedEl = document.getElementById('d-boarded');
+  const confirmBtn = document.getElementById('confirm-board-btn');
+  if (ticket.boarded) {
+    boardedEl.textContent = '✅ Already boarded at ' + new Date(ticket.boarded_at).toLocaleString();
+    boardedEl.className = 'font-semibold text-green-400';
+    confirmBtn.classList.add('hidden');
+  } else {
+    boardedEl.textContent = 'Not boarded yet';
+    boardedEl.className = 'font-semibold text-yellow-400';
+    confirmBtn.classList.remove('hidden');
+  }
+}
+
+function showInvalidResult() {
+  currentTicketCode = null;
+  const panel = document.getElementById('result-panel');
+  panel.classList.remove('hidden');
+  panel.className = 'rounded-2xl shadow-lg p-6 border-2 border-red-600 bg-red-950/40';
+
+  document.getElementById('result-icon-wrap').className = 'w-14 h-14 rounded-full flex items-center justify-center text-2xl bg-red-600 pulse-ring-red';
+  document.getElementById('result-icon-wrap').innerHTML = '<i class="fas fa-triangle-exclamation"></i>';
+  document.getElementById('result-title').textContent = '❌ INVALID OR FAKE TICKET DETECTED';
+  document.getElementById('result-title').className = 'text-xl font-extrabold text-red-400';
+  document.getElementById('result-sub').textContent = 'This QR code could not be verified against the live database.';
+  document.getElementById('result-details').classList.add('hidden');
+  document.getElementById('confirm-board-btn').classList.add('hidden');
+}
+
+async function confirmBoard() {
+  if (!currentTicketCode) return;
+  const btn = document.getElementById('confirm-board-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Confirming...';
+  try {
+    const res = await axios.post('/api/verify/board', { ticket_code: currentTicketCode }, { headers: { Authorization: 'Bearer ' + token } });
+    if (res.data.ticket) showValidResult(res.data.ticket);
+  } catch (err) {
+    alert(err.response?.data?.error || 'Failed to confirm boarding');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-bus"></i> Confirm Bus Boarded & Verified';
+  }
+}
+
+function resetResult() {
+  document.getElementById('result-panel').classList.add('hidden');
+  currentTicketCode = null;
+}
+
+// ---------------- Init ----------------
+(function init() {
+  if (token && currentUser) {
+    showApp();
+  } else {
+    showAuth();
+  }
+})();
+</script>
+</body>
+</html>
