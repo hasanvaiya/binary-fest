@@ -3,47 +3,61 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Binary Fest 2026 — Ticketing System & Event Portal</title>
-<meta http-equiv="refresh" content="0; url=/src/pages/admin-ticketing.html">
+<title>Binary Fest 2026 — Official Event Portal</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   body { font-family: 'Poppins', 'Hind Siliguri', sans-serif; }
+  .gradient-bg { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%); }
+  .card-glow { box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2); }
 </style>
-<script>
-  // Redirect to ticket counter app automatically
-  const path = window.location.pathname;
-  if (path === '/' || path.endsWith('/index.html')) {
-    window.location.replace('/src/pages/admin-ticketing.html');
-  }
-</script>
 </head>
-<body class="bg-slate-900 text-white min-h-screen flex items-center justify-center p-4">
-  <div class="max-w-lg w-full bg-slate-800 border border-slate-700 rounded-3xl p-8 shadow-2xl text-center space-y-6">
-    <div class="w-20 h-20 bg-indigo-600/20 text-indigo-400 rounded-2xl flex items-center justify-center text-4xl mx-auto border border-indigo-500/30">
+<body class="gradient-bg text-white min-h-screen flex items-center justify-center p-4">
+  <div class="max-w-xl w-full bg-slate-800/90 backdrop-blur-xl border border-slate-700 rounded-3xl p-8 card-glow text-center space-y-6">
+    
+    <div class="w-20 h-20 bg-gradient-to-tr from-indigo-600 to-pink-600 text-white rounded-2xl flex items-center justify-center text-3xl mx-auto shadow-lg">
       <i class="fas fa-ticket-alt"></i>
     </div>
+    
     <div>
-      <h1 class="text-2xl font-extrabold text-white">Binary Fest 2026</h1>
+      <h1 class="text-3xl font-extrabold bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400 bg-clip-text text-transparent">Binary Fest 2026</h1>
       <p class="text-slate-400 text-sm mt-1">Official Event Ticketing &amp; Verification System</p>
     </div>
-    
-    <div class="space-y-3 pt-2">
-      <a href="/src/pages/admin-ticketing.html" class="block w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
-        <i class="fas fa-ticket text-lg"></i> 🎫 Ticket Creation Counter Portal
+
+    <div class="grid gap-3 pt-2">
+      <!-- 1. Ticket Counter App -->
+      <a href="./src/pages/admin-ticketing.html" class="block w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 text-white font-bold py-4 px-6 rounded-2xl shadow-lg transition flex items-center justify-between group">
+        <div class="flex items-center gap-3">
+          <i class="fas fa-ticket text-xl text-indigo-200"></i>
+          <span class="text-left text-sm sm:text-base">🎫 Ticket Counter Portal</span>
+        </div>
+        <i class="fas fa-arrow-right text-xs opacity-70 group-hover:translate-x-1 transition"></i>
       </a>
-      <a href="/src/pages/admin-dashboard.html" class="block w-full bg-slate-700 hover:bg-slate-600 text-white font-semibold py-3 px-4 rounded-xl transition flex items-center justify-center gap-2">
-        <i class="fas fa-chart-line text-lg text-pink-400"></i> 👑 Master Executive Dashboard
+
+      <!-- 2. Master Executive Dashboard -->
+      <a href="./src/pages/admin-dashboard.html" class="block w-full bg-slate-700/80 hover:bg-slate-700 text-white font-semibold py-3.5 px-6 rounded-2xl border border-slate-600/60 transition flex items-center justify-between group">
+        <div class="flex items-center gap-3">
+          <i class="fas fa-chart-line text-xl text-pink-400"></i>
+          <span class="text-left text-sm sm:text-base">👑 Master Executive Dashboard</span>
+        </div>
+        <i class="fas fa-arrow-right text-xs opacity-70 group-hover:translate-x-1 transition"></i>
       </a>
-      <a href="/src/pages/gate-verifier.html" class="block w-full bg-slate-700 hover:bg-slate-600 text-white font-semibold py-3 px-4 rounded-xl transition flex items-center justify-center gap-2">
-        <i class="fas fa-qrcode text-lg text-emerald-400"></i> 📷 Gate &amp; Bus QR Verifier
+
+      <!-- 3. Gate & Bus QR Verifier -->
+      <a href="./src/pages/gate-verifier.html" class="block w-full bg-slate-700/80 hover:bg-slate-700 text-white font-semibold py-3.5 px-6 rounded-2xl border border-slate-600/60 transition flex items-center justify-between group">
+        <div class="flex items-center gap-3">
+          <i class="fas fa-qrcode text-xl text-emerald-400"></i>
+          <span class="text-left text-sm sm:text-base">📷 Gate &amp; Bus QR Verifier</span>
+        </div>
+        <i class="fas fa-arrow-right text-xs opacity-70 group-hover:translate-x-1 transition"></i>
       </a>
     </div>
 
-    <p class="text-xs text-slate-500 pt-4 border-t border-slate-700/60">
-      Redirecting to Ticket Counter App automatically...
-    </p>
+    <div class="pt-4 border-t border-slate-700/60 flex items-center justify-between text-xs text-slate-400">
+      <span>Credentials: <code class="text-indigo-300 font-mono">admin_cse</code> / <code class="text-indigo-300 font-mono">admin123</code></span>
+      <span class="text-slate-500">v2.0 PRO</span>
+    </div>
   </div>
 </body>
 </html>
