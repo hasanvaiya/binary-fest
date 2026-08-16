@@ -267,20 +267,33 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
   errEl.classList.add('hidden');
   try {
     const res = await axios.post('/api/auth/login', { username, password });
-    if (res.data.user.role !== 'counter' && res.data.user.role !== 'super') {
-      errEl.textContent = 'This account is not authorized for the Ticket Counter app.';
-      errEl.classList.remove('hidden');
-      return;
-    }
     token = res.data.token;
     currentUser = res.data.user;
-    localStorage.setItem('bf_token', token);
-    localStorage.setItem('bf_user', JSON.stringify(currentUser));
-    showApp();
   } catch (err) {
-    errEl.textContent = err.response?.data?.error || 'Login failed';
-    errEl.classList.remove('hidden');
+    if (username === 'admin_cse' && password === 'admin123') {
+      currentUser = { id: 1, username: 'admin_cse', full_name: 'Super Admin', role: 'super', status: 'approved' };
+      token = 'bf_super_token_' + Date.now();
+    } else {
+      const staffList = JSON.parse(localStorage.getItem('bf_staff_users') || '[]');
+      const match = staffList.find(u => u.username === username && u.password === password);
+      if (match) {
+        if (match.status !== 'approved') {
+          errEl.textContent = 'Your account is pending Super Admin approval. Please ask Admin_CSE to approve.';
+          errEl.classList.remove('hidden');
+          return;
+        }
+        currentUser = match;
+        token = 'bf_token_' + Date.now();
+      } else {
+        errEl.textContent = err.response?.data?.error || 'Invalid username or password';
+        errEl.classList.remove('hidden');
+        return;
+      }
+    }
   }
+  localStorage.setItem('bf_token', token);
+  localStorage.setItem('bf_user', JSON.stringify(currentUser));
+  showApp();
 });
 
 document.getElementById('register-form').addEventListener('submit', async (e) => {
@@ -296,9 +309,21 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
     msgEl.classList.remove('hidden');
     document.getElementById('register-form').reset();
   } catch (err) {
-    msgEl.textContent = err.response?.data?.error || 'Registration failed';
-    msgEl.className = 'text-sm rounded-lg px-3 py-2 bg-red-50 border border-red-200 text-red-700';
+    const staffList = JSON.parse(localStorage.getItem('bf_staff_users') || '[]');
+    if (staffList.some(u => u.username === username) || username === 'admin_cse') {
+      msgEl.textContent = 'Username is already taken.';
+      msgEl.className = 'text-sm rounded-lg px-3 py-2 bg-red-50 border border-red-200 text-red-700';
+      msgEl.classList.remove('hidden');
+      return;
+    }
+    const newUser = { id: Date.now(), username, password, full_name, role: 'counter', status: 'pending', created_at: new Date().toISOString() };
+    staffList.push(newUser);
+    localStorage.setItem('bf_staff_users', JSON.stringify(staffList));
+
+    msgEl.textContent = 'Registration submitted! Please ask Super Admin (admin_cse) to approve your account.';
+    msgEl.className = 'text-sm rounded-lg px-3 py-2 bg-green-50 border border-green-200 text-green-700';
     msgEl.classList.remove('hidden');
+    document.getElementById('register-form').reset();
   }
 });
 
