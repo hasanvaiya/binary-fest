@@ -22,7 +22,7 @@
 <body class="bg-slate-950 min-h-screen text-slate-100">
 
 <!-- ============================= AUTH SCREEN ============================= -->
-<section id="auth-screen" class="hidden min-h-screen flex items-center justify-center p-4">
+<section id="auth-screen" class="min-h-screen flex items-center justify-center p-4">
   <div class="w-full max-w-md bg-slate-900 rounded-2xl shadow-xl overflow-hidden border border-slate-800">
     <div class="gradient-header p-6 text-white text-center">
       <i class="fas fa-shield-halved text-4xl mb-2"></i>
@@ -73,7 +73,7 @@
 </section>
 
 <!-- ============================= MAIN APP ============================= -->
-<section id="app-screen" class="min-h-screen">
+<section id="app-screen" class="hidden min-h-screen">
   <header class="gradient-header text-white shadow-lg">
     <div class="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
       <div class="flex items-center gap-3">
@@ -334,17 +334,12 @@ function resetResult() {
 }
 
 // ---------------- Init ----------------
-(async function init() {
-  if (!token || !currentUser) {
-    try {
-      const res = await axios.post('/api/auth/login', { username: 'admin_cse', password: 'admin123' });
-      token = res.data.token;
-      currentUser = res.data.user;
-      localStorage.setItem('bf_token', token);
-      localStorage.setItem('bf_user', JSON.stringify(currentUser));
-    } catch (e) {}
+(function init() {
+  if (token && currentUser) {
+    showApp();
+  } else {
+    showAuth();
   }
-  showApp();
 })();
 </script>
 </body>
