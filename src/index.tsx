@@ -545,7 +545,12 @@ app.get('/admin-ticketing.html', (c) => c.html(adminTicketingHtml))
 app.get('/gate-verifier.html', (c) => c.html(gateVerifierHtml))
 app.get('/admin-dashboard.html', (c) => c.html(adminDashboardHtml))
 
-app.get('/', (c) => c.redirect('/admin-ticketing.html'))
+app.get('/counter', (c) => c.html(adminTicketingHtml))
+app.get('/ticket', (c) => c.html(adminTicketingHtml))
+app.get('/checker', (c) => c.html(gateVerifierHtml))
+app.get('/gate', (c) => c.html(gateVerifierHtml))
+app.get('/admin', (c) => c.html(adminDashboardHtml))
+app.get('/', (c) => c.html(adminDashboardHtml))
 
 app.notFound((c) => c.json({ error: 'Not found' }, 404))
 
