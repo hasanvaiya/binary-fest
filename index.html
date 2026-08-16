@@ -1,224 +1,49 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WebApp - Next-Gen Web Application Studio</title>
-  <meta name="description" content="Next-Gen High Performance Web Application Platform with interactive analytics, task suite, and visual studio." />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="styles.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Binary Fest 2026 — Ticketing System & Event Portal</title>
+<meta http-equiv="refresh" content="0; url=/src/pages/admin-ticketing.html">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Poppins', 'Hind Siliguri', sans-serif; }
+</style>
+<script>
+  // Redirect to ticket counter app automatically
+  const path = window.location.pathname;
+  if (path === '/' || path.endsWith('/index.html')) {
+    window.location.replace('/src/pages/admin-ticketing.html');
+  }
+</script>
 </head>
-<body class="dark-theme">
-  <!-- Background Glow & Particle Canvas -->
-  <div class="ambient-glow glow-1"></div>
-  <div class="ambient-glow glow-2"></div>
-  <canvas id="bgCanvas"></canvas>
+<body class="bg-slate-900 text-white min-h-screen flex items-center justify-center p-4">
+  <div class="max-w-lg w-full bg-slate-800 border border-slate-700 rounded-3xl p-8 shadow-2xl text-center space-y-6">
+    <div class="w-20 h-20 bg-indigo-600/20 text-indigo-400 rounded-2xl flex items-center justify-center text-4xl mx-auto border border-indigo-500/30">
+      <i class="fas fa-ticket-alt"></i>
+    </div>
+    <div>
+      <h1 class="text-2xl font-extrabold text-white">Binary Fest 2026</h1>
+      <p class="text-slate-400 text-sm mt-1">Official Event Ticketing &amp; Verification System</p>
+    </div>
+    
+    <div class="space-y-3 pt-2">
+      <a href="/src/pages/admin-ticketing.html" class="block w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+        <i class="fas fa-ticket text-lg"></i> 🎫 Ticket Creation Counter Portal
+      </a>
+      <a href="/src/pages/admin-dashboard.html" class="block w-full bg-slate-700 hover:bg-slate-600 text-white font-semibold py-3 px-4 rounded-xl transition flex items-center justify-center gap-2">
+        <i class="fas fa-chart-line text-lg text-pink-400"></i> 👑 Master Executive Dashboard
+      </a>
+      <a href="/src/pages/gate-verifier.html" class="block w-full bg-slate-700 hover:bg-slate-600 text-white font-semibold py-3 px-4 rounded-xl transition flex items-center justify-center gap-2">
+        <i class="fas fa-qrcode text-lg text-emerald-400"></i> 📷 Gate &amp; Bus QR Verifier
+      </a>
+    </div>
 
-  <!-- Application Shell -->
-  <div class="app-container">
-    <!-- Navigation Bar -->
-    <header class="app-header">
-      <div class="brand">
-        <div class="brand-logo">
-          <i class="fa-solid fa-cubes-stacked"></i>
-        </div>
-        <div class="brand-text">
-          <span class="brand-name">WebApp</span>
-          <span class="brand-badge">v2.4 PRO</span>
-        </div>
-      </div>
-      <nav class="nav-links">
-        <button class="nav-item active" data-tab="overview"><i class="fa-solid fa-chart-line"></i> Dashboard</button>
-        <button class="nav-item" data-tab="studio"><i class="fa-solid fa-wand-magic-sparkles"></i> App Studio</button>
-        <button class="nav-item" data-tab="tasks"><i class="fa-solid fa-list-check"></i> Tasks & Projects</button>
-        <button class="nav-item" data-tab="settings"><i class="fa-solid fa-sliders"></i> Settings</button>
-      </nav>
-      <div class="header-actions">
-        <div class="status-indicator">
-          <span class="pulse-dot"></span>
-          <span class="status-text">System Active</span>
-        </div>
-        <button class="btn btn-primary" id="launchDemoBtn">
-          <i class="fa-solid fa-rocket"></i> Quick Launch
-        </button>
-      </div>
-    </header>
-
-    <!-- Main Content Area -->
-    <main class="main-content">
-      <!-- Tab 1: Overview Dashboard -->
-      <section class="tab-content active" id="overview-tab">
-        <div class="hero-banner">
-          <div class="hero-text">
-            <h1>Welcome to <span class="gradient-text">WebApp Studio</span></h1>
-            <p>Your high-performance workspace for web application management, live analytics, and creative development.</p>
-            <div class="hero-ctas">
-              <button class="btn btn-glow" id="createProjectBtn"><i class="fa-solid fa-plus"></i> New Web Project</button>
-              <button class="btn btn-outline" id="viewDocsBtn"><i class="fa-solid fa-book-open"></i> Documentation</button>
-            </div>
-          </div>
-          <div class="hero-stats">
-            <div class="stat-card">
-              <div class="stat-icon"><i class="fa-solid fa-bolt"></i></div>
-              <div class="stat-info">
-                <span class="stat-value" id="speedCounter">99.8%</span>
-                <span class="stat-label">Performance Score</span>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon"><i class="fa-solid fa-server"></i></div>
-              <div class="stat-info">
-                <span class="stat-value" id="uptimeVal">99.99%</span>
-                <span class="stat-label">Uptime Reliability</span>
-              </div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
-              <div class="stat-info">
-                <span class="stat-value" id="activeUsers">14.2k</span>
-                <span class="stat-label">Active Sessions</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="dashboard-grid">
-          <!-- Live Metrics Widget -->
-          <div class="glass-card grid-col-8">
-            <div class="card-header">
-              <h3><i class="fa-solid fa-chart-area"></i> Real-time Performance Metrics</h3>
-              <div class="card-actions">
-                <button class="btn-icon" title="Refresh" id="refreshMetrics"><i class="fa-solid fa-rotate-right"></i></button>
-              </div>
-            </div>
-            <div class="chart-container">
-              <canvas id="metricsChart"></canvas>
-            </div>
-          </div>
-
-          <!-- Quick Action Widget -->
-          <div class="glass-card grid-col-4">
-            <div class="card-header">
-              <h3><i class="fa-solid fa-microchip"></i> System Health</h3>
-            </div>
-            <div class="health-metrics">
-              <div class="metric-progress">
-                <div class="metric-info"><span>CPU Load</span><strong id="cpuLoad">32%</strong></div>
-                <div class="progress-bar"><div class="progress-fill" style="width: 32%"></div></div>
-              </div>
-              <div class="metric-progress">
-                <div class="metric-info"><span>Memory Usage</span><strong id="memLoad">48%</strong></div>
-                <div class="progress-bar"><div class="progress-fill accent" style="width: 48%"></div></div>
-              </div>
-              <div class="metric-progress">
-                <div class="metric-info"><span>API Latency</span><strong id="apiLatency">24ms</strong></div>
-                <div class="progress-bar"><div class="progress-fill success" style="width: 24%"></div></div>
-              </div>
-            </div>
-            <div class="quick-tools">
-              <button class="tool-btn" id="pingBtn"><i class="fa-solid fa-network-wired"></i> Run Ping</button>
-              <button class="tool-btn" id="purgeCacheBtn"><i class="fa-solid fa-broom"></i> Purge Cache</button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Tab 2: App Studio -->
-      <section class="tab-content" id="studio-tab">
-        <div class="studio-header glass-card">
-          <h2><i class="fa-solid fa-palette"></i> WebApp Interactive Component Studio</h2>
-          <p>Customize dynamic themes, test layout engines, and generate live UI code.</p>
-        </div>
-        <div class="studio-workspace">
-          <div class="glass-card studio-controls">
-            <h3>Studio Controls</h3>
-            <div class="control-group">
-              <label>Primary Theme Color</label>
-              <input type="color" id="themePicker" value="#6366f1">
-            </div>
-            <div class="control-group">
-              <label>Card Glassmorphism</label>
-              <input type="range" id="glassBlur" min="0" max="30" value="12">
-            </div>
-            <div class="control-group">
-              <label>Accent Glow Intensity</label>
-              <input type="range" id="glowIntensity" min="0" max="100" value="60">
-            </div>
-            <button class="btn btn-primary" id="resetStudioBtn"><i class="fa-solid fa-rotate-left"></i> Reset Defaults</button>
-          </div>
-          <div class="glass-card studio-preview">
-            <h3>Live Preview</h3>
-            <div class="preview-box" id="previewContainer">
-              <div class="sample-card">
-                <div class="sample-badge">Featured Component</div>
-                <h4>Responsive WebApp Card</h4>
-                <p>This element dynamically updates as you adjust the studio controls in real time.</p>
-                <div class="sample-buttons">
-                  <button class="btn btn-glow">Action Button</button>
-                  <button class="btn btn-outline">Secondary</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Tab 3: Tasks & Projects -->
-      <section class="tab-content" id="tasks-tab">
-        <div class="glass-card">
-          <div class="card-header">
-            <h2><i class="fa-solid fa-list-check"></i> Project Task Board</h2>
-            <div class="card-actions">
-              <input type="text" id="newTaskInput" placeholder="Enter new task name..." class="input-field" />
-              <button class="btn btn-primary" id="addTaskBtn"><i class="fa-solid fa-plus"></i> Add Task</button>
-            </div>
-          </div>
-          <div class="tasks-list" id="tasksList">
-            <!-- Dynamic Tasks Rendered Here -->
-          </div>
-        </div>
-      </section>
-
-      <!-- Tab 4: Settings -->
-      <section class="tab-content" id="settings-tab">
-        <div class="glass-card">
-          <h2><i class="fa-solid fa-sliders"></i> System Settings</h2>
-          <div class="settings-grid">
-            <div class="setting-item">
-              <div class="setting-text">
-                <strong>Dark Mode & Ambient Lighting</strong>
-                <p>Toggle high-contrast glassmorphic background visuals.</p>
-              </div>
-              <input type="checkbox" id="ambientToggle" checked class="toggle-switch">
-            </div>
-            <div class="setting-item">
-              <div class="setting-text">
-                <strong>Real-time Telemetry Updates</strong>
-                <p>Enable automatic live metric updates every 2 seconds.</p>
-              </div>
-              <input type="checkbox" id="liveTelemetryToggle" checked class="toggle-switch">
-            </div>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <!-- Footer -->
-    <footer class="app-footer">
-      <div class="footer-info">
-        <p>&copy; 2026 <strong>WebApp Engine</strong>. Built with Modern HTML5, CSS3, & Vanilla JavaScript.</p>
-      </div>
-      <div class="footer-links">
-        <a href="#privacy"><i class="fa-solid fa-shield-halved"></i> Security</a>
-        <a href="#docs"><i class="fa-solid fa-book"></i> API Reference</a>
-        <a href="#status"><i class="fa-solid fa-circle-check"></i> Status Page</a>
-      </div>
-    </footer>
+    <p class="text-xs text-slate-500 pt-4 border-t border-slate-700/60">
+      Redirecting to Ticket Counter App automatically...
+    </p>
   </div>
-
-  <script src="app.js"></script>
 </body>
 </html>
