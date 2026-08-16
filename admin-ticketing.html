@@ -141,7 +141,32 @@
           </div>
           <div>
             <label class="text-xs font-semibold text-slate-500">Bus Pickup Point *</label>
-            <select id="f-bus" required class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"></select>
+            <select id="f-bus" required class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none text-slate-800 bg-white font-medium text-base">
+              <option value="ভালুকা">ভালুকা</option>
+              <option value="মাওনা">মাওনা</option>
+              <option value="রাজেন্দ্রপুর">রাজেন্দ্রপুর</option>
+              <option value="শিববাড়ি">শিববাড়ি</option>
+              <option value="শিমুলতলী">শিমুলতলী</option>
+              <option value="চন্দ্রা">চন্দ্রা</option>
+              <option value="কোনাবাড়ি">কোনাবাড়ি</option>
+              <option value="সাভার">সাভার</option>
+              <option value="শ্রীপুর">শ্রীপুর</option>
+              <option value="নরসিংদী">নরসিংদী</option>
+              <option value="কালিগঞ্জ">কালিগঞ্জ</option>
+              <option value="চাষাড়া">চাষাড়া</option>
+              <option value="বাসাবো">বাসাবো</option>
+              <option value="স্টাফ কোয়ার্টার">স্টাফ কোয়ার্টার</option>
+              <option value="মোহাম্মদপুর">মোহাম্মদপুর</option>
+              <option value="মিরপুর ইসিবি">মিরপুর ইসিবি</option>
+              <option value="মিরপুর ১৪">মিরপুর ১৪</option>
+              <option value="মিরপুর ১২">মিরপুর ১২</option>
+              <option value="মিরপুর ১০">মিরপুর ১০</option>
+              <option value="মহাখালী">মহাখালী</option>
+              <option value="টঙ্গী কলেজ গেট">টঙ্গী কলেজ গেট</option>
+              <option value="ঘোড়াশাল">ঘোড়াশাল</option>
+              <option value="শিববাড়ি ডুয়েট">শিববাড়ি ডুয়েট</option>
+              <option value="উত্তরা">উত্তরা</option>
+            </select>
           </div>
         </div>
         <div id="ticket-error" class="hidden text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2"></div>
@@ -435,6 +460,7 @@ document.getElementById('ticket-form').addEventListener('submit', async (e) => {
 });
 
 // ---------------- Init ----------------
+populateBusPoints();
 (function init() {
   if (token && currentUser) {
     showApp();
