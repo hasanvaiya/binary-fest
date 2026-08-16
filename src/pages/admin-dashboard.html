@@ -656,7 +656,7 @@ async function approveAll() {
   catch (err) { alert(err.response?.data?.error || 'Failed'); }
 }
 
-populateBusPoints();
+loadBusPoints();
 (function init() {
   if (token && currentUser) {
     showApp();
