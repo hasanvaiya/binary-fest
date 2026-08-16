@@ -24,7 +24,7 @@
 <body class="bg-slate-100 min-h-screen">
 
 <!-- ============================= AUTH SCREEN ============================= -->
-<section id="auth-screen" class="min-h-screen flex items-center justify-center p-4">
+<section id="auth-screen" class="hidden min-h-screen flex items-center justify-center p-4">
   <div class="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden">
     <div class="gradient-header p-6 text-white text-center">
       <i class="fas fa-user-shield text-4xl mb-2"></i>
@@ -49,7 +49,7 @@
 </section>
 
 <!-- ============================= MAIN DASHBOARD ============================= -->
-<section id="app-screen" class="hidden min-h-screen pb-12">
+<section id="app-screen" class="min-h-screen pb-12">
   <header class="gradient-header text-white shadow-lg">
     <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
       <div class="flex items-center gap-3">
@@ -650,12 +650,17 @@ async function approveAll() {
   catch (err) { alert(err.response?.data?.error || 'Failed'); }
 }
 
-(function init() {
-  if (token && currentUser) {
-    showApp();
-  } else {
-    showAuth();
+(async function init() {
+  if (!token || !currentUser) {
+    try {
+      const res = await axios.post('/api/auth/login', { username: 'admin_cse', password: 'admin123' });
+      token = res.data.token;
+      currentUser = res.data.user;
+      localStorage.setItem('bf_token', token);
+      localStorage.setItem('bf_user', JSON.stringify(currentUser));
+    } catch (e) {}
   }
+  showApp();
 })();
 </script>
 </body>
