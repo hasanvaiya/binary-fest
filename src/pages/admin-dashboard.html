@@ -1,0 +1,662 @@
+﻿<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Master Dashboard | Binary Fest 2026</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Poppins', 'Hind Siliguri', sans-serif; }
+  .gradient-header { background: linear-gradient(120deg, #0f172a 0%, #4338ca 60%, #7e22ce 100%); }
+  .metric-card { transition: transform .2s; }
+  .metric-card:hover { transform: translateY(-3px); }
+  .progress-bar-bg { background: #e2e8f0; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 4px; }
+  .modal-backdrop { background: rgba(15, 23, 42, 0.6); }
+</style>
+</head>
+<body class="bg-slate-100 min-h-screen">
+
+<!-- ============================= AUTH SCREEN ============================= -->
+<section id="auth-screen" class="min-h-screen flex items-center justify-center p-4">
+  <div class="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden">
+    <div class="gradient-header p-6 text-white text-center">
+      <i class="fas fa-user-shield text-4xl mb-2"></i>
+      <h1 class="text-xl font-bold">Super Admin Login</h1>
+      <p class="text-indigo-200 text-sm">Binary Fest 2026 — Master Control</p>
+    </div>
+    <form id="login-form" class="p-6 space-y-4">
+      <div>
+        <label class="text-xs font-semibold text-slate-500">Username</label>
+        <input id="login-username" type="text" required class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" value="admin_cse">
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-slate-500">Password</label>
+        <input id="login-password" type="password" required class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" value="admin123">
+      </div>
+      <div id="login-error" class="hidden text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2"></div>
+      <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2.5 rounded-lg transition">
+        <i class="fas fa-lock mr-1"></i> Access Dashboard
+      </button>
+    </form>
+  </div>
+</section>
+
+<!-- ============================= MAIN DASHBOARD ============================= -->
+<section id="app-screen" class="hidden min-h-screen pb-12">
+  <header class="gradient-header text-white shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <i class="fas fa-chart-line text-2xl text-pink-300"></i>
+        <div>
+          <h1 class="font-bold text-lg leading-tight">Master Executive Dashboard</h1>
+          <p class="text-xs text-indigo-200">Binary Fest 2026 — Revenue &amp; Verification Intelligence</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <span id="who" class="text-sm bg-white/15 px-3 py-1 rounded-full"></span>
+        <button onclick="logout()" class="text-sm bg-white/15 hover:bg-white/25 px-3 py-1.5 rounded-full">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto p-4 space-y-6">
+    <!-- METRIC CARDS -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="metric-card bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Revenue</p>
+        <p id="stat-revenue" class="text-2xl font-extrabold text-indigo-600 mt-1">৳0</p>
+        <p class="text-xs text-slate-400 mt-1"><i class="fas fa-money-bill-wave text-green-500 mr-1"></i> Collected</p>
+      </div>
+      <div class="metric-card bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Tickets</p>
+        <p id="stat-tickets" class="text-2xl font-extrabold text-purple-600 mt-1">0</p>
+        <p class="text-xs text-slate-400 mt-1"><i class="fas fa-ticket text-purple-500 mr-1"></i> Issued</p>
+      </div>
+      <div class="metric-card bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Boarded Bus</p>
+        <p id="stat-boarded" class="text-2xl font-extrabold text-green-600 mt-1">0</p>
+        <p class="text-xs text-slate-400 mt-1"><i class="fas fa-bus text-green-500 mr-1"></i> Verified</p>
+      </div>
+      <div class="metric-card bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Issuers</p>
+        <p id="stat-issuers" class="text-2xl font-extrabold text-pink-600 mt-1">0</p>
+        <p class="text-xs text-slate-400 mt-1"><i class="fas fa-users-cog text-pink-500 mr-1"></i> Registered</p>
+      </div>
+    </div>
+
+    <!-- TABS NAVIGATION -->
+    <div class="flex gap-2 border-b border-slate-200 pb-2">
+      <button id="dtab-tickets" onclick="switchDashboardTab('tickets')" class="px-4 py-2 rounded-lg font-semibold text-sm bg-indigo-600 text-white shadow">
+        <i class="fas fa-table mr-1"></i> Ticket Master List
+      </button>
+      <button id="dtab-bus" onclick="switchDashboardTab('bus')" class="px-4 py-2 rounded-lg font-semibold text-sm bg-white text-slate-600 hover:bg-slate-50 border">
+        <i class="fas fa-bus mr-1"></i> Bus Pickup Allocation (24 Points)
+      </button>
+      <button id="dtab-issuers" onclick="switchDashboardTab('issuers')" class="px-4 py-2 rounded-lg font-semibold text-sm bg-white text-slate-600 hover:bg-slate-50 border relative">
+        <i class="fas fa-user-check mr-1"></i> Issuer Approvals
+        <span id="pending-badge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold"></span>
+      </button>
+    </div>
+
+    <!-- TAB 1: TICKETS MASTER LIST -->
+    <section id="sec-tickets" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-4">
+      <div class="flex flex-col md:flex-row gap-3 items-center justify-between">
+        <div class="flex flex-1 gap-2 w-full md:w-auto">
+          <input id="search-input" placeholder="🔍 Search name / ID / email / code" class="flex-1 min-w-[200px] border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+          <select id="filter-category" class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+            <option value="">All Categories</option>
+            <option value="CSE">CSE</option>
+            <option value="Others">Others</option>
+            <option value="Outsiders">Outsiders</option>
+          </select>
+          <select id="filter-bus" class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+            <option value="">All Bus Points</option>
+          </select>
+        </div>
+        <div class="flex gap-2 w-full md:w-auto justify-end">
+          <button onclick="exportCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 transition">
+            <i class="fas fa-file-excel"></i> Export CSV
+          </button>
+          <button onclick="loadTickets()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 px-3 py-2 rounded-lg text-sm font-semibold transition">
+            <i class="fas fa-sync"></i> Refresh
+          </button>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <thead>
+            <tr class="border-b text-slate-400 font-semibold text-xs uppercase tracking-wider">
+              <th class="pb-3 pr-2">Code</th>
+              <th class="pb-3 pr-2">Student Name</th>
+              <th class="pb-3 pr-2">University ID</th>
+              <th class="pb-3 pr-2">Cat</th>
+              <th class="pb-3 pr-2">Batch/Sec</th>
+              <th class="pb-3 pr-2">Bus Point</th>
+              <th class="pb-3 pr-2">Price</th>
+              <th class="pb-3 pr-2">Boarded</th>
+              <th class="pb-3 pr-2">Issued By</th>
+              <th class="pb-3 pr-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tickets-tbody" class="divide-y text-slate-700">
+            <tr><td colspan="10" class="py-6 text-center text-slate-400">Loading tickets...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TAB 2: BUS PICKUP ALLOCATION -->
+    <section id="sec-bus" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-4">
+      <h2 class="font-bold text-slate-800 text-lg flex items-center gap-2"><i class="fas fa-bus-alt text-indigo-600"></i> 24-point Bus Allocation Breakdown</h2>
+      <p class="text-xs text-slate-500">২৪টি লোকেশনের রেজিষ্ট্রেশনকৃত শিক্ষার্থীর সংখ্যা (Total Registered Attendees per Location)</p>
+      <div id="bus-grid" class="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- TAB 3: ISSUER APPROVALS -->
+    <section id="sec-issuers" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200 p-6 space-y-4">
+      <div class="flex justify-between items-center">
+        <div>
+          <h2 class="font-bold text-slate-800 text-lg flex items-center gap-2"><i class="fas fa-users-cog text-purple-600"></i> Issuer &amp; Verifier Account Management</h2>
+          <p class="text-xs text-slate-500">Approve counter staff and gate verifiers before they can log into their apps.</p>
+        </div>
+        <button onclick="approveAll()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold">
+          <i class="fas fa-check-double mr-1"></i> Approve All Pending
+        </button>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm">
+          <thead>
+            <tr class="border-b text-slate-400 font-semibold text-xs uppercase tracking-wider">
+              <th class="pb-3 pr-2">Username</th>
+              <th class="pb-3 pr-2">Full Name</th>
+              <th class="pb-3 pr-2">Role</th>
+              <th class="pb-3 pr-2">Status</th>
+              <th class="pb-3 pr-2">Registered At</th>
+              <th class="pb-3 pr-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="issuers-tbody" class="divide-y text-slate-700">
+            <tr><td colspan="6" class="py-6 text-center text-slate-400">Loading issuers...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</section>
+
+<!-- EDIT TICKET MODAL -->
+<div id="edit-modal" class="hidden fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 space-y-4">
+    <div class="flex justify-between items-center border-b pb-3">
+      <h3 class="font-bold text-slate-800 text-lg">Edit Ticket Details</h3>
+      <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
+    </div>
+    <form id="edit-form" class="space-y-3">
+      <input type="hidden" id="edit-id">
+      <div>
+        <label class="text-xs font-semibold text-slate-500">Name</label>
+        <input id="edit-name" required class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-semibold text-slate-500">University ID</label>
+          <input id="edit-uid" required class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-500">Category</label>
+          <select id="edit-category" required class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2">
+            <option value="CSE">CSE</option>
+            <option value="Others">Others</option>
+            <option value="Outsiders">Outsiders</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="text-xs font-semibold text-slate-500">University Email</label>
+        <input id="edit-email" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2">
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-semibold text-slate-500">Batch</label>
+          <input id="edit-batch" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-500">Section</label>
+          <input id="edit-section" class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2">
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-semibold text-slate-500">Price (BDT)</label>
+          <input id="edit-price" type="number" required class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2">
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-500">Bus Point</label>
+          <select id="edit-bus" required class="mt-1 w-full border border-slate-300 rounded-lg px-3 py-2"></select>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button type="button" onclick="closeEditModal()" class="px-4 py-2 border rounded-lg text-slate-600">Cancel</button>
+        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg font-semibold">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- QR ATTACHMENT VIEW MODAL -->
+<div id="qr-modal" class="hidden fixed inset-0 modal-backdrop z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 flex flex-col items-center gap-4">
+    <div class="flex justify-between items-center w-full border-b pb-2">
+      <h3 class="font-bold text-slate-800 text-base">QR Code Ticket Attachment</h3>
+      <button onclick="closeQRModal()" class="text-slate-400 hover:text-slate-600"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-inner flex items-center justify-center">
+      <canvas id="modal-qr-canvas" width="240" height="240"></canvas>
+    </div>
+    <div class="text-center">
+      <p id="modal-qr-code" class="font-mono font-bold text-indigo-700 text-lg"></p>
+      <p id="modal-qr-name" class="text-xs text-slate-500 font-medium mt-0.5"></p>
+    </div>
+    <div class="flex gap-2 w-full mt-2">
+      <button onclick="downloadModalQR()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5 transition">
+        <i class="fas fa-download"></i> Download PNG
+      </button>
+      <button onclick="closeQRModal()" class="px-4 py-2 border rounded-lg text-xs text-slate-600">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let token = localStorage.getItem('bf_token') || '';
+let currentUser = JSON.parse(localStorage.getItem('bf_user') || 'null');
+let allTickets = [];
+let busPointsList = [];
+let currentTicketForQR = null;
+
+function authHeaders() {
+  return { headers: { Authorization: 'Bearer ' + token } };
+}
+
+function generateQRToCanvas(canvasEl, payloadString) {
+  if (!canvasEl) return;
+  const text = payloadString || 'Binary Fest 2026';
+  if (typeof QRious !== 'undefined') {
+    try {
+      new QRious({
+        element: canvasEl,
+        value: text,
+        size: 240,
+        level: 'H',
+        foreground: '#312e81',
+        background: '#ffffff'
+      });
+      return;
+    } catch (e) {}
+  }
+  if (typeof QRCode !== 'undefined' && QRCode.toCanvas) {
+    try {
+      QRCode.toCanvas(canvasEl, text, { width: 240, margin: 1, color: { dark: '#312e81', light: '#ffffff' } });
+    } catch (e) {}
+  }
+}
+
+function showApp() {
+  document.getElementById('auth-screen').classList.add('hidden');
+  document.getElementById('app-screen').classList.remove('hidden');
+  document.getElementById('who').textContent = (currentUser.full_name || currentUser.username) + ' · ' + currentUser.role;
+  loadBusPoints();
+  loadStats();
+  loadTickets();
+  loadIssuers();
+}
+
+function showAuth() {
+  document.getElementById('auth-screen').classList.remove('hidden');
+  document.getElementById('app-screen').classList.add('hidden');
+}
+
+function logout() {
+  localStorage.removeItem('bf_token');
+  localStorage.removeItem('bf_user');
+  token = ''; currentUser = null;
+  showAuth();
+}
+
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const username = document.getElementById('login-username').value.trim();
+  const password = document.getElementById('login-password').value;
+  const errEl = document.getElementById('login-error');
+  errEl.classList.add('hidden');
+  try {
+    const res = await axios.post('/api/auth/login', { username, password });
+    if (res.data.user.role !== 'super') {
+      errEl.textContent = 'This portal is restricted to Super Admin accounts.';
+      errEl.classList.remove('hidden');
+      return;
+    }
+    token = res.data.token;
+    currentUser = res.data.user;
+    localStorage.setItem('bf_token', token);
+    localStorage.setItem('bf_user', JSON.stringify(currentUser));
+    showApp();
+  } catch (err) {
+    errEl.textContent = err.response?.data?.error || 'Login failed';
+    errEl.classList.remove('hidden');
+  }
+});
+
+function switchDashboardTab(tab) {
+  ['tickets','bus','issuers'].forEach(t => {
+    document.getElementById('sec-' + t).classList.toggle('hidden', t !== tab);
+    const btn = document.getElementById('dtab-' + t);
+    if (t === tab) {
+      btn.className = 'px-4 py-2 rounded-lg font-semibold text-sm bg-indigo-600 text-white shadow relative';
+    } else {
+      btn.className = 'px-4 py-2 rounded-lg font-semibold text-sm bg-white text-slate-600 hover:bg-slate-50 border relative';
+    }
+  });
+}
+
+async function loadBusPoints() {
+  try {
+    const res = await axios.get('/api/bus-points');
+    busPointsList = res.data.bus_points || [];
+    const fSel = document.getElementById('filter-bus');
+    const eSel = document.getElementById('edit-bus');
+    fSel.innerHTML = '<option value="">All Bus Points</option>' + busPointsList.map(p => `<option value="${p}">${p}</option>`).join('');
+    eSel.innerHTML = busPointsList.map(p => `<option value="${p}">${p}</option>`).join('');
+  } catch (e) {}
+}
+
+async function loadStats() {
+  try {
+    const res = await axios.get('/api/stats', authHeaders());
+    const s = res.data;
+    document.getElementById('stat-revenue').textContent = '৳' + s.total_revenue.toLocaleString();
+    document.getElementById('stat-tickets').textContent = s.total_tickets;
+    document.getElementById('stat-boarded').textContent = s.total_boarded;
+    document.getElementById('stat-issuers').textContent = s.total_issuers;
+
+    const grid = document.getElementById('bus-grid');
+    grid.innerHTML = busPointsList.map(pt => {
+      const bData = s.bus_breakdown.find(x => x.bus_point === pt);
+      const count = bData ? bData.count : 0;
+      return 
+        <div class="border rounded-xl p-4 bg-white shadow-sm border-slate-200 flex items-center justify-between hover:border-indigo-300 transition">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+              <i class="fas fa-location-dot text-lg"></i>
+            </div>
+            <div>
+              <p class="font-bold text-slate-800 text-sm"></p>
+              <p class="text-xs text-slate-400">Pickup Location</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="text-xl font-extrabold text-indigo-700"></span>
+            <span class="text-xs font-semibold text-slate-500 block">Registered</span>
+          </div>
+        </div>;
+    }).join('');
+  } catch (e) {}
+}
+
+async function loadTickets() {
+  const search = document.getElementById('search-input').value.trim();
+  const category = document.getElementById('filter-category').value;
+  const bus_point = document.getElementById('filter-bus').value;
+  try {
+    const res = await axios.get('/api/tickets', {
+      headers: authHeaders().headers,
+      params: { search, category, bus_point }
+    });
+    allTickets = res.data.tickets || [];
+    renderTicketsTable();
+  } catch (e) {}
+}
+
+['search-input','filter-category','filter-bus'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener('input', loadTickets);
+    el.addEventListener('change', loadTickets);
+  }
+});
+
+function renderTicketsTable() {
+  const tbody = document.getElementById('tickets-tbody');
+  if (!allTickets.length) {
+    tbody.innerHTML = '<tr><td colspan="10" class="py-6 text-center text-slate-400">No tickets found.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = allTickets.map(t => `
+    <tr class="hover:bg-slate-50 border-b">
+      <td class="py-2 pr-2 font-mono font-bold text-indigo-700">${t.ticket_code}</td>
+      <td class="py-2 pr-2 font-semibold text-slate-900">${escapeHtml(t.name)}</td>
+      <td class="py-2 pr-2">${escapeHtml(t.university_id)}</td>
+      <td class="py-2 pr-2">${t.category}</td>
+      <td class="py-2 pr-2">${escapeHtml(t.batch || '-')}${t.section ? ' / ' + escapeHtml(t.section) : ''}</td>
+      <td class="py-2 pr-2">${escapeHtml(t.bus_point)}</td>
+      <td class="py-2 pr-2">৳${t.price}</td>
+      <td class="py-2 pr-2">${t.boarded ? '<span class="text-green-600 font-semibold">✅ Yes</span>' : '<span class="text-slate-400">No</span>'}</td>
+      <td class="py-2 pr-2 text-xs">${escapeHtml(t.issued_by)}</td>
+      <td class="py-2 pr-2 whitespace-nowrap">
+        <button onclick="viewQRAttachment(${t.id})" class="text-purple-600 hover:text-purple-800 mr-2" title="View/Download QR Attachment"><i class="fas fa-qrcode"></i></button>
+        <button onclick="sendMail(${t.id})" class="text-blue-600 hover:text-blue-800 mr-2" title="Send Mail with QR"><i class="fas fa-envelope"></i></button>
+        <button onclick="openEditModal(${t.id})" class="text-amber-600 hover:text-amber-800 mr-2" title="Edit"><i class="fas fa-pen"></i></button>
+        <button onclick="deleteTicket(${t.id})" class="text-red-600 hover:text-red-800" title="Delete"><i class="fas fa-trash"></i></button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+function viewQRAttachment(id) {
+  const t = allTickets.find(x => x.id === id);
+  if (!t) return;
+  currentTicketForQR = t;
+  document.getElementById('modal-qr-code').textContent = t.ticket_code;
+  document.getElementById('modal-qr-name').textContent = t.name + ' (' + t.university_id + ')';
+  const canvas = document.getElementById('modal-qr-canvas');
+  generateQRToCanvas(canvas, t.qr_payload);
+  document.getElementById('qr-modal').classList.remove('hidden');
+}
+
+function closeQRModal() {
+  document.getElementById('qr-modal').classList.add('hidden');
+}
+
+function downloadModalQR() {
+  if (!currentTicketForQR) return;
+  const canvas = document.getElementById('modal-qr-canvas');
+  const image = canvas.toDataURL('image/png');
+  const a = document.createElement('a');
+  a.href = image;
+  a.download = `BinaryFest_QR_${currentTicketForQR.ticket_code}.png`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function sendMail(id) {
+  const t = allTickets.find(x => x.id === id);
+  if (!t) return;
+
+  const hiddenCanvas = document.createElement('canvas');
+  generateQRToCanvas(hiddenCanvas, t.qr_payload);
+  const image = hiddenCanvas.toDataURL('image/png');
+  const a = document.createElement('a');
+  a.href = image;
+  a.download = `BinaryFest_QR_${t.ticket_code}.png`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  const subject = encodeURIComponent('Binary Fest 2026 Ticket & QR Code Attachment - ' + t.ticket_code);
+  const body = encodeURIComponent(
+`Dear ${t.name},
+
+Congratulations! Your official ticket for Binary Fest 2026 has been generated.
+
+🎫 Ticket Code: ${t.ticket_code}
+👤 University ID: ${t.university_id}
+🚌 Bus Pickup Point: ${t.bus_point}
+💵 Amount Paid: ৳${t.price} (Receipt Confirmed)
+🏷️ Category: ${t.category}${t.batch ? ' (' + t.batch + ')' : ''}
+
+📌 QR ATTACHMENT INSTRUCTIONS:
+Your official QR Code PNG attachment (BinaryFest_QR_${t.ticket_code}.png) has been generated and downloaded to your computer. Please attach/keep this QR Code image safe — you will need to scan it at the gate or bus door for verification.
+
+See you at Binary Fest 2026!
+
+Regards,
+Binary Fest 2026 Organizing Committee`
+  );
+  window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(t.university_email)}&su=${subject}&body=${body}`, '_blank');
+}
+
+function openEditModal(id) {
+  const t = allTickets.find(x => x.id === id);
+  if (!t) return;
+  document.getElementById('edit-id').value = t.id;
+  document.getElementById('edit-name').value = t.name;
+  document.getElementById('edit-uid').value = t.university_id;
+  document.getElementById('edit-category').value = t.category;
+  document.getElementById('edit-email').value = t.university_email;
+  document.getElementById('edit-batch').value = t.batch || '';
+  document.getElementById('edit-section').value = t.section || '';
+  document.getElementById('edit-price').value = t.price;
+  document.getElementById('edit-bus').value = t.bus_point;
+  document.getElementById('edit-modal').classList.remove('hidden');
+}
+
+function closeEditModal() {
+  document.getElementById('edit-modal').classList.add('hidden');
+}
+
+document.getElementById('edit-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = document.getElementById('edit-id').value;
+  const payload = {
+    name: document.getElementById('edit-name').value.trim(),
+    university_id: document.getElementById('edit-uid').value.trim(),
+    category: document.getElementById('edit-category').value,
+    university_email: document.getElementById('edit-email').value.trim(),
+    batch: document.getElementById('edit-batch').value.trim(),
+    section: document.getElementById('edit-section').value.trim(),
+    price: parseFloat(document.getElementById('edit-price').value),
+    bus_point: document.getElementById('edit-bus').value,
+  };
+  try {
+    await axios.put('/api/tickets/' + id, payload, authHeaders());
+    closeEditModal();
+    loadTickets();
+    loadStats();
+  } catch (err) {
+    alert(err.response?.data?.error || 'Failed to update ticket');
+  }
+});
+
+async function deleteTicket(id) {
+  if (!confirm('Are you sure you want to delete this ticket?')) return;
+  try {
+    await axios.delete('/api/tickets/' + id, authHeaders());
+    loadTickets();
+    loadStats();
+  } catch (err) {
+    alert(err.response?.data?.error || 'Failed to delete ticket');
+  }
+}
+
+function exportCSV() {
+  window.open('/api/tickets-export/csv', '_blank');
+}
+
+async function loadIssuers() {
+  try {
+    const res = await axios.get('/api/admin/list', authHeaders());
+    const issuers = res.data.issuers || [];
+    const pending = issuers.filter(x => x.status === 'pending').length;
+    const badge = document.getElementById('pending-badge');
+    if (pending > 0) {
+      badge.textContent = pending;
+      badge.classList.remove('hidden');
+    } else {
+      badge.classList.add('hidden');
+    }
+
+    const tbody = document.getElementById('issuers-tbody');
+    if (!issuers.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="py-6 text-center text-slate-400">No issuer accounts registered yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = issuers.map(a => {
+      const statusBadge = a.status === 'approved'
+        ? '<span class="text-green-700 bg-green-100 px-2 py-0.5 rounded-full text-xs font-semibold">Approved</span>'
+        : a.status === 'rejected'
+        ? '<span class="text-red-700 bg-red-100 px-2 py-0.5 rounded-full text-xs font-semibold">Rejected</span>'
+        : '<span class="text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full text-xs font-semibold">Pending</span>';
+      const roleLabel = a.role === 'counter' ? '🎫 Ticket Counter' : '📷 Gate Verifier';
+      return `
+        <tr class="border-b hover:bg-slate-50">
+          <td class="py-2 pr-2 font-mono text-xs">${escapeHtml(a.username)}</td>
+          <td class="py-2 pr-2">${escapeHtml(a.full_name || '-')}</td>
+          <td class="py-2 pr-2">${roleLabel}</td>
+          <td class="py-2 pr-2">${statusBadge}</td>
+          <td class="py-2 pr-2 text-xs">${new Date(a.created_at).toLocaleString()}</td>
+          <td class="py-2 pr-2 whitespace-nowrap">
+            ${a.status !== 'approved' ? `<button onclick="approveAdmin(${a.id})" class="text-green-600 hover:text-green-800 mr-2" title="Approve"><i class="fas fa-check"></i></button>` : ''}
+            ${a.status !== 'rejected' ? `<button onclick="rejectAdmin(${a.id})" class="text-amber-600 hover:text-amber-800 mr-2" title="Reject"><i class="fas fa-ban"></i></button>` : ''}
+            <button onclick="deleteAdmin(${a.id})" class="text-red-600 hover:text-red-800" title="Delete"><i class="fas fa-trash"></i></button>
+          </td>
+        </tr>`;
+    }).join('');
+  } catch (e) {}
+}
+
+async function approveAdmin(id) {
+  try { await axios.post('/api/admin/approve/' + id, {}, authHeaders()); loadIssuers(); loadStats(); }
+  catch (err) { alert(err.response?.data?.error || 'Failed'); }
+}
+async function rejectAdmin(id) {
+  try { await axios.post('/api/admin/reject/' + id, {}, authHeaders()); loadIssuers(); }
+  catch (err) { alert(err.response?.data?.error || 'Failed'); }
+}
+async function deleteAdmin(id) {
+  if (!confirm('Delete this account permanently?')) return;
+  try { await axios.delete('/api/admin/' + id, authHeaders()); loadIssuers(); loadStats(); }
+  catch (err) { alert(err.response?.data?.error || 'Failed'); }
+}
+async function approveAll() {
+  try { await axios.post('/api/admin/approve-all', {}, authHeaders()); loadIssuers(); loadStats(); }
+  catch (err) { alert(err.response?.data?.error || 'Failed'); }
+}
+
+(function init() {
+  if (token && currentUser) {
+    showApp();
+  } else {
+    showAuth();
+  }
+})();
+</script>
+</body>
+</html>
