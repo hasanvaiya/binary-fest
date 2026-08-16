@@ -1,0 +1,11 @@
+[
+  {
+    "ticket_code": "BF26-SAMPLE01",
+    "name": "Sample Attendee",
+    "university_id": "213902000",
+    "category": "CSE",
+    "price": 1000,
+    "bus_point": "\u0989\u09a4\u09cd\u09a4\u09b0\u09be",
+    "created_at": "2026-08-17"
+  }
+]
